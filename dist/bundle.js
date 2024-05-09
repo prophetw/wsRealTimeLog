@@ -158,7 +158,7 @@ websocket.onopen = () => {
 				msgInfoObj[type] = []
 			}
 			msgInfoObj[type].push(msg)
-			updateRender()
+			render()
 		} catch (error) {
 
 		}
@@ -169,38 +169,41 @@ websocket.onclose = () => {
 	console.log('WebSocket Client Disconnected');
 }
 
-function updateRender() {
-	// logger.log(' msgInfoObj: ', msgInfoObj);
-	const select = document.getElementById('logFilter')
-	// update option in select 
-	select.innerHTML = `<option value="">请选择log类型</option>`
-	Object.keys(msgInfoObj).forEach((type) => {
-		const option = document.createElement('option')
-		option.value = type
-		option.text = type
-		select.add(option)
-	})
-	select.onchange = (e) => {
-		curFilter = e.target.value
-		select.value = curFilter
-		updateRender()
-	}
-
-
-	// update log
+function updateLog(){
 	const preElement = document.getElementById('logContent')
-	preElement.innerHTML = ''
-
 	if (curFilter) {
-		select.value = curFilter
+		preElement.innerHTML = ''
 		const msgAry = []
 		msgInfoObj[curFilter].forEach((msg) => {
 			msgAry.push(msg)
 		})
 		preElement.innerHTML = msgAry.join('\n')
-
 	}
+}
 
+const typeAry = Object.keys(msgInfoObj);
+const select = document.getElementById('logFilter')
+select.onchange = (e) => {
+	curFilter = e.target.value
+	select.value = curFilter
+}
+
+function render() {
+	// logger.log(' msgInfoObj: ', msgInfoObj);
+	// update option in select 
+	if(typeAry.length !== Object.keys(msgInfoObj).length){
+		// only render when option changed 
+		select.innerHTML = `<option value="">请选择log类型</option>`
+		typeAry = Object.keys(msgInfoObj);
+		typeAry.forEach((type) => {
+			const option = document.createElement('option')
+			option.value = type
+			option.text = type
+			select.add(option)
+		})
+	}
+	// update log
+	updateLog()
 }
 
 
