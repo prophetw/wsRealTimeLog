@@ -134,7 +134,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const websocket = new WebSocket('ws://localhost:8796')
+
+const websocket = new WebSocket(`ws://${window.location.host}`)
 const logService = (0,_logger__WEBPACK_IMPORTED_MODULE_0__["default"])('logReader', websocket)
 
 logService.log('WebSocket Client Connected', {'ah': 11});

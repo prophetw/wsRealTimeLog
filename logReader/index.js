@@ -1,7 +1,8 @@
 import logger from "./logger"
 
 
-const websocket = new WebSocket('ws://localhost:8796')
+
+const websocket = new WebSocket(`ws://${window.location.host}`)
 const logService = logger('logReader', websocket)
 
 logService.log('WebSocket Client Connected', {'ah': 11});

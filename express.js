@@ -8,6 +8,9 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
+// 存储所有活跃的连接
+const clients = new Set();
+
 // static server
 app.use(express.static('dist'));
 // need cors 
@@ -16,23 +19,40 @@ app.use((req, res, next) => {
 	next();
 });
 
+function broadcast(message, sender) {
+	for (let client of clients) {
+			if (client !== sender && client.readyState === WebSocket.OPEN) {
+					try {
+							const msgObj = JSON.parse(message);
+							const {type, timestamp, msg} = msgObj;
+							client.send(JSON.stringify({
+									type: type || 'default',
+									msg: `${timestamp}, ${msg}`
+							}));
+					} catch (error) {
+							client.send(JSON.stringify({
+									type: 'error',
+									msg: `Error in message format`
+							}));
+					}
+			}
+	}
+}
+
 wss.on('connection', function(ws) {
+  clients.add(ws);
+
 	ws.on('message', function(message) {
-		console.log('received: %s', message);
-		try {
-			const msgObj = JSON.parse(message);
-			console.log(msgObj);
-			const {type, timestamp, msg} = msgObj;
-			ws.send(JSON.stringify({
-				type: type || 'default',
-				msg: `${timestamp}, ${msg}`
-			}));
-		} catch (error) {
-			ws.send(JSON.stringify({
-				type: 'hello',
-				msg: `${message}`
-			}));
-		}
+		console.log('Received: %s', message);
+		broadcast(message, ws);
+});
+
+	ws.on('close', function() {
+		clients.delete(ws);
+	});
+
+	ws.on('error', function(e) {
+			console.log('WebSocket error: ', e);
 	});
 });
 
