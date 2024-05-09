@@ -7,11 +7,14 @@ const http = require('http');
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
-// 
 
-
-
-
+// static server
+app.use(express.static('dist'));
+// need cors 
+app.use((req, res, next) => {
+	res.header('Access-Control-Allow-Origin', '*');
+	next();
+});
 
 wss.on('connection', function(ws) {
 	ws.on('message', function(message) {
@@ -33,6 +36,6 @@ wss.on('connection', function(ws) {
 	});
 });
 
-server.listen(8080, () => {
-    console.log('Listening on http://localhost:8080');
+server.listen(8796, () => {
+    console.log('Listening on http://localhost:8796');
 });
