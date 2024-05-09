@@ -1,14 +1,12 @@
-# nodejs will start a websocket server on port 3000 
-
 # To start the server, run the following command:
 ```bash
-node websocket.js
+node express.js
 # log to websocket real-time
 # use frontend webpage to read log in real time
 
 ```
 
-# frontend
+# frontend development
 ```bash
 pnpm install
 pnpm start
@@ -17,7 +15,7 @@ pnpm start
 # in your node js or other programe language
 ```js app.js
 // init websocket 
-const clientWS = new WebSocketServer({port: 8796});
+const clientWS = new Websocket({url: "${websocketUrl} ws://{ip}:{port}"});
 /**
  * @param {string} type
  * @param {WebSocket} clientWebsocket
