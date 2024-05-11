@@ -12,38 +12,65 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+
+
 /**
  * 
  * @param {string} type 
  * @param {WebSocket} clientWebsocket 
+ * @param {boolean} isUseThrottle // 是否使用节流
  * @returns 
  */
-const logger = (type, clientWebsocket) => {
+const logger = (type, clientWebsocket, isUseThrottle = true) => {
 	const msgPool = []
+	let timer = null;
+	const throttle = (fn, delay, ...args) => {
+		if (timer) {
+			const msg = getMsg(...args);
+			msgPool.push(msg)
+			return
+		}
+		timer = setTimeout(() => {
+			fn(...args)
+			timer = null;  // 清除 timer
+		}, delay)
+	}
+
+	const getMsg = (...args) => {
+		const timestamp = new Date().toLocaleString();
+		return JSON.stringify({
+			type,
+			timestamp,
+			msg: [...args].map(arg => {
+				try {
+					return JSON.stringify(arg);
+				} catch (error) {
+					return `Error in stringifying argument: ${error.message}`;
+				}
+			}).join(',')
+		})
+	}
+
+	const sendMsg = (...args) => {
+		if (clientWebsocket) {
+			const msg = getMsg(...args);
+			msgPool.push(msg)
+			if (clientWebsocket.readyState === 1) {
+				if (msgPool.length > 0) {
+					// msgPool.forEach(i => clientWebsocket.send(i))
+					clientWebsocket.send(JSON.stringify([...msgPool]))
+					msgPool.length = 0
+				}
+			} 
+		}
+	}
+
 	return {
 		log: function (...args) {
-			const timestamp = new Date().toLocaleString();
-			if(clientWebsocket){
-				const msg = JSON.stringify({
-					type, 
-					timestamp, 
-					msg: [...args].map(arg => {
-						try {
-								return JSON.stringify(arg);
-						} catch (error) {
-								return `Error in stringifying argument: ${error.message}`;
-						}
-          }).join(',')
-				})
-				if(clientWebsocket.readyState === 1){
-					clientWebsocket.send(msg)
-					if(msgPool.length){
-						msgPool.forEach(i=>clientWebsocket.send(i))
-						msgPool.length = 0
-					}
-				}else{
-					msgPool.push(msg)
-				}
+			if (isUseThrottle) {
+				throttle(sendMsg, 200, ...args)
+			} else {
+				sendMsg(...args)
 			}
 			console.log(...args)
 			// console.log(timestamp, JSON.stringify({type, timestamp, msg: [...args].map(i=>JSON.stringify(i)).join(',')}))
@@ -181,7 +208,7 @@ function updateLog(){
 	}
 }
 
-const typeAry = Object.keys(msgInfoObj);
+let typeAry = Object.keys(msgInfoObj);
 const select = document.getElementById('logFilter')
 select.onchange = (e) => {
 	curFilter = e.target.value

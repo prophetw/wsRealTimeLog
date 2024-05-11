@@ -24,11 +24,20 @@ function broadcast(message, sender) {
 			if (client !== sender && client.readyState === WebSocket.OPEN) {
 					try {
 							const msgObj = JSON.parse(message);
-							const {type, timestamp, msg} = msgObj;
-							client.send(JSON.stringify({
-									type: type || 'default',
-									msg: `${timestamp}, ${msg}`
-							}));
+							if(Array.isArray(msgObj)){
+								const type = msgObj[0].type || 'default';
+								const msg = msgObj.map(i => i.msg).join('\n');
+								client.send(JSON.stringify({
+										type,
+										msg
+								}));
+							}else{
+								const {type, msg} = msgObj;
+								client.send(JSON.stringify({
+										type: type || 'default',
+										msg: `${msg}`
+								}));
+							}
 					} catch (error) {
 							client.send(JSON.stringify({
 									type: 'error',
@@ -43,7 +52,7 @@ wss.on('connection', function(ws) {
   clients.add(ws);
 
 	ws.on('message', function(message) {
-		console.log('Received: %s', message);
+		// console.log('Received: %s', message);
 		broadcast(message, ws);
 });
 

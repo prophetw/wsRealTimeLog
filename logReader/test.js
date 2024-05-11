@@ -1,13 +1,4 @@
-
-
-/**
- * 
- * @param {string} type 
- * @param {WebSocket} clientWebsocket 
- * @param {boolean} isUseThrottle // 是否使用节流
- * @returns 
- */
-const logger = (type, clientWebsocket, isUseThrottle = true, delay = 200) => {
+const logger = (type, clientWebsocket, isUseThrottle = true, delay) => {
 	const msgPool = []
 	let timer = null;
 	const throttle = (fn, delay, ...args) => {
@@ -75,5 +66,11 @@ const logger = (type, clientWebsocket, isUseThrottle = true, delay = 200) => {
 		},
 	}
 }
+const aaaa = new WebSocket('ws://localhost:8796/')
+const log = logger('test', aaaa, true, 1000)
+setInterval(()=>{
+    log.log(`${new Date().toLocaleString()}`,
+        'aaaaa---', `hello ${Date.now()}`
+    )
+}, 10)
 
-export default logger;
