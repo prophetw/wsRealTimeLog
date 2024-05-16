@@ -5,7 +5,7 @@ import logger from "./logger"
 const websocket = new WebSocket(`ws://${window.location.host}`)
 const logService = logger('logReader', websocket)
 
-logService.log('WebSocket Client Connected', {'ah': 11});
+logService.log('WebSocket Client Connected', { 'ah': 11 });
 console.log(logService);
 
 let msgInfoObj = {
@@ -36,7 +36,7 @@ websocket.onclose = () => {
 	console.log('WebSocket Client Disconnected');
 }
 
-function updateLog(){
+function updateLog() {
 	const preElement = document.getElementById('logContent')
 	if (curFilter) {
 		preElement.innerHTML = ''
@@ -53,12 +53,13 @@ const select = document.getElementById('logFilter')
 select.onchange = (e) => {
 	curFilter = e.target.value
 	select.value = curFilter
+	render();
 }
 
 function render() {
 	// logger.log(' msgInfoObj: ', msgInfoObj);
 	// update option in select 
-	if(typeAry.length !== Object.keys(msgInfoObj).length){
+	if (typeAry.length !== Object.keys(msgInfoObj).length) {
 		// only render when option changed 
 		select.innerHTML = `<option value="">请选择log类型</option>`
 		typeAry = Object.keys(msgInfoObj);
