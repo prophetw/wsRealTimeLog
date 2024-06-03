@@ -54,7 +54,7 @@ wss.on('connection', function(ws) {
 	ws.on('message', function(message) {
 		// console.log('Received: %s', message);
 		broadcast(message, ws);
-});
+	});
 
 	ws.on('close', function() {
 		clients.delete(ws);
